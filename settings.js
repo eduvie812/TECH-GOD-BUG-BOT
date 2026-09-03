@@ -39,6 +39,14 @@ global.autobio = true
 global.anti92 = false
 global.autoswview = true
 
+//AI chat bot (LLM) — true = auto-reply to non-command DMs
+global.chatbot = false
+//AI provider to use: "simsimi" | "gpt" | "fallback"
+global.aiProvider = 'simsimi'
+//Bot persona for the chatbot
+global.aiName = 'Alpha'
+global.aiPersona = `You are Alpha, a friendly and witty WhatsApp bot made by Mason. Keep replies short, casual and fun. Use emojis sometimes.`
+
 //menu type (v1=image, v2=video+image, v3=video, v4=call end)
 global.typemenu = 'v2'
 

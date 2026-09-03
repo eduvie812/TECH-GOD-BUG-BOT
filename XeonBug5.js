@@ -25,6 +25,7 @@ const { performance } = require('perf_hooks')
 const more = String.fromCharCode(8206)
 const readmore = more.repeat(4001)
 const { TelegraPh, UploadFileUgu, webp2mp4File, floNime } = require('./lib/uploader')
+const { chatWithAI } = require('./lib/chatbot')
 const { toAudio, toPTT, toVideo, ffmpeg, addExifAvatar } = require('./lib/converter')
 const { smsg, getGroupAdmins, formatp, jam, formatDate, getTime, isUrl, await, sleep, clockString, msToDate, sort, toNumber, enumGetKey, runtime, fetchJson, getBuffer, json, delay, format, logic, generateProfilePicture, parseMention, getRandom, pickRandom, reSize } = require('./lib/myfunc')
 let afk = require("./lib/afk");
@@ -349,7 +350,20 @@ let buffer = fs.readFileSync(`./XeonMedia/doc/${BhosdikaXeon}.pdf`)
 senddocu(buffer)
 }
 }
-        
+
+// ---- AI Chatbot auto-reply ----
+if (global.chatbot && budy && !isCmd && !m.key.fromMe && isText) {
+    const mentioned = (m.mentionedJid || []).map(j => XeonBotInc.decodeJid(j))
+    const isMentioned = mentioned.includes(XeonBotInc.decodeJid(XeonBotInc.user.id))
+    if (!m.isGroup || isMentioned) {
+        try {
+            await XeonBotInc.sendPresenceUpdate('composing', m.chat).catch(_=>_)
+            const aiReply = await chatWithAI(budy)
+            await XeonBotInc.sendMessage(m.chat, { text: `🤖 *${global.aiName || 'Alpha'}*\n\n${aiReply}` }, { quoted: m })
+        } catch (e) { /* swallow */ }
+    }
+}
+
         if (m.isGroup && !m.key.fromMe) {
             let mentionUser = [...new Set([...(m.mentionedJid || []), ...(m.quoted ? [m.quoted.sender] : [])])]
             for (let ment of mentionUser) {
@@ -2723,6 +2737,45 @@ break
                     replygcxeon(`🌦️ *Weather in ${text}*\n\nCondition: ${pickRandom(conds)}\nTemp: ${t}°C\n\n— ${botname}`)
                 }
                 break
+            case 'ai':
+            case 'gpt':
+            case 'ask':
+            case 'chat':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} <your question>\n\nExample: ${prefix+command} tell me a joke`)
+                    await XeonBotInc.sendMessage(m.chat, { react: { text: '🤖', key: m.key } }).catch(_ => _)
+                    try {
+                        const reply = await chatWithAI(text)
+                        await XeonBotInc.sendMessage(m.chat, { text: `🤖 *${global.aiName || 'Alpha'}*\n\n${reply}\n\n— powered by Mason` }, { quoted: m })
+                    } catch (e) {
+                        replygcxeon('❌ AI error: ' + (e.message || e))
+                    }
+                }
+                break
+            case 'chatbot':
+                {
+                    if (!isCreator && !m.key.fromMe) return replygcxeon(mess.owner)
+                    const opt = (args[0] || '').toLowerCase()
+                    if (opt === 'on') {
+                        global.chatbot = true
+                        fs.writeFileSync('./database/chatbot.json', JSON.stringify({ enabled: true }, null, 2))
+                        replygcxeon('🤖 *Chatbot ON* — I will auto-reply in DMs.')
+                    } else if (opt === 'off') {
+                        global.chatbot = false
+                        fs.writeFileSync('./database/chatbot.json', JSON.stringify({ enabled: false }, null, 2))
+                        replygcxeon('🤖 *Chatbot OFF* — silent mode.')
+                    } else if (opt === 'provider') {
+                        const p = (args[1] || '').toLowerCase()
+                        if (!['simsimi','gpt','fallback'].includes(p)) return replygcxeon('⚠️ Provider must be: simsimi, gpt, or fallback')
+                        global.aiProvider = p
+                        replygcxeon(`🤖 AI provider set to: *${p}*`)
+                    } else if (opt === 'status') {
+                        replygcxeon(`🤖 Chatbot: *${global.chatbot ? 'ON ✅' : 'OFF ❌'}*\nProvider: *${global.aiProvider}*`)
+                    } else {
+                        replygcxeon(`Use:\n${prefix}chatbot on/off\n${prefix}chatbot provider simsimi|gpt|fallback\n${prefix}chatbot status`)
+                    }
+                }
+                break
             case 'menu':
             case 'help':
             case 'alive':
@@ -2900,6 +2953,14 @@ _Any help: contact Mason_
 ┃ ❏ *ʏᴛᴍᴘ3*
 ┃ ❏ *ʏᴛᴍᴘ4*
 ┃ ❏ *sᴏᴜɴᴅ1 - sᴏᴜɴᴅ161*
+╰══════════════════⊷
+╭═══❂ 𝗔𝗜 𝗖𝗛𝗔𝗧𝗕𝗢𝗧 𝗠𝗘𝗡𝗨 ❂
+┃ ❏ *ᴀɪ / ɢᴘᴛ <ǫᴜᴇsᴛɪᴏɴ>*
+┃ ❏ *ᴀsᴋ <ǫᴜᴇsᴛɪᴏɴ>*
+┃ ❏ *ᴄʜᴀᴛ <ᴍᴇssᴀɢᴇ>*
+┃ ❏ *ᴄʜᴀᴛʙᴏᴛ ᴏɴ/ᴏғғ*
+┃ ❏ *ᴄʜᴀᴛʙᴏᴛ sᴛᴀᴛᴜs*
+┃ ❏ *ᴄʜᴀᴛʙᴏᴛ ᴘʀᴏᴠɪᴅᴇʀ*
 ╰══════════════════⊷`
 if (typemenu === 'v1') {
                     XeonBotInc.sendMessage(m.chat, {
