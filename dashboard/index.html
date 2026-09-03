@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚡ Alpha by Mason — Dashboard</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --panel: #131a2c; --panel2: #1a2238;
+    --border: #2a3454; --text: #e6ecff; --muted: #8893b8;
+    --accent: #7c5cff; --accent2: #00e0ff; --green: #2ee59d;
+    --red: #ff5470; --yellow: #ffd166;
+  }
+  * { box-sizing: border-box }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; }
+  a { color: var(--accent2); text-decoration: none }
+  header {
+    background: linear-gradient(90deg, #1a1f3a 0%, #2a1a4a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 22px; display: flex; align-items: center; gap: 14px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .5px }
+  header .sub { color: var(--muted); font-size: 12px }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--panel2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .dot.on { background: var(--green); box-shadow: 0 0 10px var(--green); }
+  main { display: grid; grid-template-columns: 1fr 380px; gap: 18px; padding: 18px; max-width: 1280px; margin: 0 auto; }
+  @media (max-width: 980px) { main { grid-template-columns: 1fr } }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .card h2 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .stat { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  .stat .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px }
+  .stat .value { font-size: 20px; font-weight: 700; margin-top: 4px }
+  .qr-wrap { display: flex; align-items: center; justify-content: center; min-height: 280px; background: #fff; border-radius: 10px; padding: 10px; }
+  .qr-wrap img { max-width: 100%; height: auto; }
+  .qr-info { text-align: center; color: var(--muted); font-size: 13px; margin-top: 10px }
+  .logs { background: #06090f; border: 1px solid var(--border); border-radius: 10px; padding: 12px; height: 280px; overflow: auto; font: 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; color: #c5d1ff; white-space: pre-wrap; }
+  .logs .line { padding: 1px 0 }
+  .msgs { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 8px; height: 280px; overflow: auto; }
+  .msg { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .msg:last-child { border-bottom: none }
+  .msg .meta { color: var(--muted); font-size: 11px }
+  .toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; }
+  .toggle + .toggle { margin-top: 8px }
+  .switch { position: relative; width: 42px; height: 22px; }
+  .switch input { display: none }
+  .slider { position: absolute; inset: 0; background: #2a3454; border-radius: 999px; cursor: pointer; transition: .2s; }
+  .slider::before { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: .2s; }
+  .switch input:checked + .slider { background: var(--accent) }
+  .switch input:checked + .slider::before { transform: translateX(20px) }
+  input, select, textarea, button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 11px; font: inherit; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent) }
+  button { cursor: pointer; background: var(--accent); border: none; font-weight: 600; }
+  button:hover { filter: brightness(1.1) }
+  button.ghost { background: var(--panel2); border: 1px solid var(--border); color: var(--text); }
+  button.danger { background: var(--red) }
+  textarea { width: 100%; min-height: 60px; resize: vertical; font-family: inherit; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1 }
+  .kv { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+  .kv .k { color: var(--muted) }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted) }
+  .badge.ok { color: var(--green); border-color: var(--green) }
+  .badge.err { color: var(--red); border-color: var(--red) }
+  .section-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 8px; }
+  .footer { color: var(--muted); text-align: center; padding: 18px; font-size: 12px; }
+  pre.kvbox { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin: 0; font-size: 12px; max-height: 200px; overflow: auto; }
+</style>
+</head>
+<body>
+<header>
+  <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#7c5cff,#00e0ff);display:flex;align-items:center;justify-content:center;font-size:20px">⚡</div>
+  <div>
+    <h1>Alpha by Mason <span class="sub">— Dashboard</span></h1>
+    <div class="sub" id="subline">loading…</div>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <span class="pill"><span class="dot" id="dot"></span><span id="conntxt">offline</span></span>
+    <span class="pill" id="uptime">uptime 0s</span>
+    <button class="ghost" id="refreshBtn">↻ Refresh</button>
+  </div>
+</header>
+
+<main>
+  <div>
+    <!-- Connect / QR -->
+    <div class="card">
+      <h2>📱 Connect WhatsApp</h2>
+      <div id="qrArea" class="qr-wrap">
+        <div style="color:#000">Loading…</div>
+      </div>
+      <div class="qr-info" id="qrInfo">Scanning status will appear here.</div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="reconnectBtn">Reconnect</button>
+        <button class="danger" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="card" style="margin-top:18px">
+      <h2>📊 Bot Stats</h2>
+      <div class="grid3">
+        <div class="stat"><div class="label">Uptime</div><div class="value" id="sUptime">—</div></div>
+        <div class="stat"><div class="label">Commands</div><div class="value" id="sCmds">—</div></div>
+        <div class="stat"><div class="label">User</div><div class="value" id="sUser">—</div></div>
+      </div>
+      <div class="section-title">Identity</div>
+      <pre class="kvbox" id="identityBox">—</pre>
+    </div>
+
+    <!-- Logs + Messages -->
+    <div class="card" style="margin-top:18px">
+      <h2>📡 Live Activity</h2>
+      <div class="grid2">
+        <div>
+          <div class="section-title">Logs</div>
+          <div class="logs" id="logs"></div>
+        </div>
+        <div>
+          <div class="section-title">Recent messages</div>
+          <div class="msgs" id="msgs"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- Send message -->
+    <div class="card">
+      <h2>✉️ Send Message</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="sendJid" placeholder="Phone (e.g. 919876543210) or jid" />
+        <textarea id="sendText" placeholder="Type a message…"></textarea>
+        <button id="sendBtn">Send</button>
+        <div id="sendStatus" class="badge" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div class="card" style="margin-top:18px">
+      <h2>⚙️ Controls</h2>
+      <label class="toggle"><span>🤖 AI Chatbot</span><span class="switch"><input type="checkbox" id="tg_chatbot"><span class="slider"></span></span></label>
+      <label class="toggle"><span>👁️ Auto status view</span><span class="switch"><input type="checkbox" id="tg_autoswview"><span class="slider"></span></span></label>
+      <label class="toggle"><span>📖 Auto read</span><span class="switch"><input type="checkbox" id="tg_autoread"><span class="slider"></span></span></label>
+      <label class="toggle"><span>⌨️ Auto typing</span><span class="switch"><input type="checkbox" id="tg_autoTyping"><span class="slider"></span></span></label>
+      <label class="toggle"><span>🎙️ Auto recording</span><span class="switch"><input type="checkbox" id="tg_autoRecording"><span class="slider"></span></span></label>
+      <label class="toggle"><span>🪪 Auto bio</span><span class="switch"><input type="checkbox" id="tg_autobio"><span class="slider"></span></span></label>
+      <label class="toggle"><span>🌐 Public mode</span><span class="switch"><input type="checkbox" id="tg_public"><span class="slider"></span></span></label>
+      <div class="section-title">AI Provider</div>
+      <div class="row">
+        <select id="aiProvider">
+          <option value="simsimi">simsimi (default)</option>
+          <option value="gpt">gpt-3.5 (free mirrors)</option>
+          <option value="fallback">fallback (offline)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Owner actions -->
+    <div class="card" style="margin-top:18px">
+      <h2>👑 Owner Actions</h2>
+      <div class="row">
+        <button class="ghost" id="restartBtn">🔄 Restart Bot</button>
+        <button class="danger" id="shutdownBtn">⛔ Shutdown</button>
+      </div>
+      <div class="section-title">Quick Eval (owner)</div>
+      <textarea id="evalCode" placeholder="await sock.sendMessage('919876543210@s.whatsapp.net', { text: 'hi' })"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button id="evalBtn">Run</button>
+      </div>
+      <pre class="kvbox" id="evalOut" style="margin-top:8px;display:none"></pre>
+    </div>
+  </div>
+</main>
+
+<div class="footer">⚡ Alpha by Mason · Baileys-powered WhatsApp bot · Dashboard</div>
+
+<script>
+const $ = (id) => document.getElementById(id)
+const dot = $('dot'), conntxt = $('conntxt'), subline = $('subline')
+const qrArea = $('qrArea'), qrInfo = $('qrInfo')
+const logsEl = $('logs'), msgsEl = $('msgs')
+let lastLogsLen = 0, statusCache = null
+
+async function api(path, opts) {
+  const r = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}))
+  return r.json()
+}
+
+function fmtUptime(s) {
+  s = Math.max(0, parseInt(s) || 0)
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), ss = s%60
+  return (d?d+'d ':'') + (h?h+'h ':'') + (m?m+'m ':'') + ss+'s'
+}
+
+function setConnection(connected) {
+  if (connected) { dot.classList.add('on'); conntxt.textContent = 'connected' }
+  else { dot.classList.remove('on'); conntxt.textContent = 'offline' }
+}
+
+async function refreshStatus() {
+  try {
+    const s = await api('/api/status')
+    statusCache = s
+    setConnection(!!s.connected)
+    subline.textContent = `${s.botname} · owner ${s.ownername}`
+    $('uptime').textContent = 'uptime ' + fmtUptime(s.uptime)
+    $('sUptime').textContent = fmtUptime(s.uptime)
+    $('sCmds').textContent = (window.__cmdCount || 0)
+    $('sUser').textContent = s.user?.name || s.user?.id?.split(':')[0] || '—'
+    let ident = ''
+    if (s.user) {
+      ident += `id: ${s.user.id || '—'}\n`
+      ident += `name: ${s.user.name || '—'}\n`
+      if (s.user.phone) ident += `phone: ${s.user.phone}\n`
+    } else ident = 'not paired yet'
+    $('identityBox').textContent = ident
+    if (s.settings) {
+      $('tg_chatbot').checked = !!s.settings.chatbot
+      $('tg_autoswview').checked = !!s.settings.autoswview
+      $('tg_autoread').checked = !!s.settings.autoread
+      $('tg_autoTyping').checked = !!s.settings.autoTyping
+      $('tg_autoRecording').checked = !!s.settings.autoRecording
+      $('tg_autobio').checked = !!s.settings.autobio
+      $('tg_public').checked = !!s.settings.public
+      $('aiProvider').value = s.settings.aiProvider || 'simsimi'
+    }
+    if (s.connected) {
+      qrArea.innerHTML = '<div style="color:#0a0e1a;font-weight:600">✅ Connected to WhatsApp</div>'
+      qrInfo.textContent = 'You are paired. Use controls below to interact.'
+    } else if (s.qr) {
+      qrArea.innerHTML = `<img src="${s.qr}" alt="QR" />`
+      qrInfo.textContent = s.pairingCode ? `Pairing code: ${s.pairingCode}` : 'Open WhatsApp → Linked Devices → Link a Device, then scan this QR.'
+    } else {
+      qrArea.innerHTML = '<div style="color:#0a0e1a">Waiting for QR…</div>'
+      qrInfo.textContent = 'No QR yet — refreshing…'
+    }
+  } catch (e) {
+    subline.textContent = 'connection error: ' + e.message
+  }
+}
+
+async function refreshLogs() {
+  try {
+    const r = await api('/api/logs')
+    if (r.logs && r.logs.length !== lastLogsLen) {
+      lastLogsLen = r.logs.length
+      logsEl.innerHTML = r.logs.map(l => `<div class="line"></div>`).join('')
+      logsEl.innerHTML = r.logs.map(l => `<div class="line">${escapeHtml(l)}</div>`).join('')
+      logsEl.scrollTop = logsEl.scrollHeight
+    }
+  } catch (_) {}
+}
+
+async function refreshMessages() {
+  try {
+    const r = await api('/api/messages')
+    if (r.messages) {
+      msgsEl.innerHTML = r.messages.length
+        ? r.messages.map(m => `<div class="msg"><div class="meta">${new Date(m.time).toLocaleTimeString()} · ${escapeHtml(m.pushname)} · ${escapeHtml(m.from)}${m.isGroup?' · group':''}</div><div>${escapeHtml(m.text || '[media]')}</div></div>`).join('')
+        : '<div class="msg"><div class="meta">no messages yet</div></div>'
+    }
+  } catch (_) {}
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+
+$('refreshBtn').onclick = refreshStatus
+$('sendBtn').onclick = async () => {
+  const jid = $('sendJid').value.trim(), text = $('sendText').value.trim()
+  if (!jid || !text) return
+  const st = $('sendStatus'); st.style.display = 'inline-block'; st.className = 'badge'; st.textContent = 'sending…'
+  const r = await api('/api/send', { method: 'POST', body: JSON.stringify({ jid, text }) })
+  if (r.ok) { st.className = 'badge ok'; st.textContent = 'sent ✓' }
+  else { st.className = 'badge err'; st.textContent = r.error || 'failed' }
+  setTimeout(() => st.style.display = 'none', 3000)
+}
+function bindToggle(id, key) {
+  $(id).addEventListener('change', async (e) => {
+    await api('/api/toggle', { method: 'POST', body: JSON.stringify({ key, value: e.target.checked }) })
+  })
+}
+bindToggle('tg_chatbot', 'chatbot')
+bindToggle('tg_autoswview', 'autoswview')
+bindToggle('tg_autoread', 'autoread')
+bindToggle('tg_autoTyping', 'autoTyping')
+bindToggle('tg_autoRecording', 'autoRecording')
+bindToggle('tg_autobio', 'autobio')
+bindToggle('tg_public', 'public')
+$('aiProvider').addEventListener('change', async (e) => {
+  await api('/api/toggle', { method: 'POST', body: JSON.stringify({ key: 'aiProvider', value: e.target.value }) })
+})
+$('restartBtn').onclick = async () => { if (confirm('Restart bot?')) await api('/api/restart', { method: 'POST' }) }
+$('shutdownBtn').onclick = async () => { if (confirm('Shutdown bot?')) await api('/api/shutdown', { method: 'POST' }) }
+$('evalBtn').onclick = async () => {
+  const out = $('evalOut'); out.style.display = 'block'; out.textContent = 'running…'
+  const code = $('evalCode').value
+  const r = await api('/api/eval', { method: 'POST', body: JSON.stringify({ code }) })
+  out.textContent = r.ok ? r.result : ('Error: ' + (r.error || 'unknown'))
+}
+
+// SSE — live updates
+try {
+  const es = new EventSource('/api/stream')
+  es.addEventListener('log', e => {
+    const line = JSON.parse(e.data)
+    const d = document.createElement('div'); d.className = 'line'; d.textContent = line
+    logsEl.appendChild(d); if (logsEl.childNodes.length > 200) logsEl.removeChild(logsEl.firstChild)
+    logsEl.scrollTop = logsEl.scrollHeight
+  })
+  es.addEventListener('msg', e => {
+    const m = JSON.parse(e.data)
+    const empty = msgsEl.querySelector('.msg .meta')?.textContent === 'no messages yet'
+    if (empty) msgsEl.innerHTML = ''
+    const d = document.createElement('div'); d.className = 'msg'
+    d.innerHTML = `<div class="meta">${new Date(m.time).toLocaleTimeString()} · ${escapeHtml(m.pushname)} · ${escapeHtml(m.from)}${m.isGroup?' · group':''}</div><div>${escapeHtml(m.text || '[media]')}</div>`
+    msgsEl.prepend(d)
+    while (msgsEl.children.length > 25) msgsEl.removeChild(msgsEl.lastChild)
+  })
+  es.onerror = () => { /* will auto-retry */ }
+} catch (_) {}
+
+setInterval(refreshStatus, 4000)
+setInterval(refreshLogs, 2000)
+setInterval(refreshMessages, 3000)
+refreshStatus(); refreshLogs(); refreshMessages()
+</script>
+</body>
+</html>

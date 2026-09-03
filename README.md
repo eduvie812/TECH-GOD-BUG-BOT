@@ -26,6 +26,27 @@ Very powerful WhatsApp multi-device bot featuring a full bug toolkit, fun games,
 5. Create a Heroku account if you don't have one.
 6. Watch the deploy tutorial and deploy.
 
+## 🌐 Web Dashboard
+
+Alpha by Mason ships with a built-in web dashboard powered by Baileys.
+
+After running `npm start`, open:
+
+```
+http://localhost:3000
+```
+
+Or set the port via env var `PORT=8080` (or `DASHBOARD_PORT=8080`).
+
+Features:
+- 📱 Live QR code for pairing (auto-refreshes)
+- 📊 Bot stats & uptime
+- ⚙️ Toggle chatbot, auto-read, status view, etc. from the UI
+- ✉️ Send messages from the dashboard
+- 👑 Owner actions: restart / shutdown / eval
+- 📡 Live logs & recent messages via Server-Sent Events
+- 🔄 Switch AI provider (simsimi / gpt / fallback)
+
 ## `Heroku` buildpacks
 1. heroku/nodejs
 2. https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest

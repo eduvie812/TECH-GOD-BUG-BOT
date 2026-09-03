@@ -16,30 +16,46 @@ const FileType = require('file-type')
 const path = require('path')
 const axios = require('axios')
 const PhoneNumber = require('awesome-phonenumber')
+const QRCode = require('qrcode')
 const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
 const { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetch, await, sleep, reSize } = require('./lib/myfunc')
 const { default: XeonBotIncConnect, delay, PHONENUMBER_MCC, makeCacheableSignalKeyStore, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto } = require("@whiskeysockets/baileys")
+const { startDashboard } = require('./lib/dashboard')
 const NodeCache = require("node-cache")
 const Pino = require("pino")
 const readline = require("readline")
 const { parsePhoneNumber } = require("libphonenumber-js")
 const makeWASocket = require("@whiskeysockets/baileys").default
 
-const store = makeInMemoryStore({
-    logger: pino().child({
-        level: 'silent',
-        stream: 'store'
-    })
-})
+// Optional in-memory store (removed in newer Baileys). Stub if missing.
+let store
+try {
+    const baileys = require("@whiskeysockets/baileys")
+    if (typeof baileys.makeInMemoryStore === 'function') {
+        store = baileys.makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
+    }
+} catch (_) {}
+if (!store) {
+    store = { bind: () => {}, loadMessage: async () => null, contacts: {} }
+}
 
-let phoneNumber = "911234567890"
+let phoneNumber = process.env.PHONE_NUMBER || ""
 let owner = JSON.parse(fs.readFileSync('./database/owner.json'))
+
+// Load persisted chatbot state
+try {
+    const cbState = JSON.parse(fs.readFileSync('./database/chatbot.json'))
+    if (typeof cbState.enabled === 'boolean') global.chatbot = cbState.enabled
+} catch (_) {}
 
 const pairingCode = !!phoneNumber || process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
+const webMode = process.argv.includes("--web") || !!process.env.DASHBOARD_PORT || process.env.WEB === '1' || !process.stdin.isTTY
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-const question = (text) => new Promise((resolve) => rl.question(text, resolve))
+const rl = webMode ? null : readline.createInterface({ input: process.stdin, output: process.stdout })
+const question = (text) => webMode
+    ? Promise.resolve(process.env.PHONE_NUMBER || phoneNumber || '')
+    : new Promise((resolve) => rl.question(text, resolve))
          
 async function startXeonBotInc() {
 //------------------------------------------------------
@@ -73,11 +89,10 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
    if (pairingCode && !XeonBotInc.authState.creds.registered) {
       if (useMobile) throw new Error('Cannot use pairing code with mobile api')
 
-      let phoneNumber
       if (!!phoneNumber) {
          phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
 
-         if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
+         if (typeof PHONENUMBER_MCC === 'object' && PHONENUMBER_MCC && !Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
             console.log(chalk.bgBlack(chalk.redBright("Start with country code of your WhatsApp Number, Example : +916909137213")))
             process.exit(0)
          }
@@ -86,12 +101,12 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
          phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
 
          // Ask again when entering the wrong number
-         if (!Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
+         if (typeof PHONENUMBER_MCC === 'object' && PHONENUMBER_MCC && !Object.keys(PHONENUMBER_MCC).some(v => phoneNumber.startsWith(v))) {
             console.log(chalk.bgBlack(chalk.redBright("Start with country code of your WhatsApp Number, Example : +916909137213")))
 
             phoneNumber = await question(chalk.bgBlack(chalk.greenBright(`Please type your WhatsApp number 😍\nFor example: +916909137213 : `)))
             phoneNumber = phoneNumber.replace(/[^0-9]/g, '')
-            rl.close()
+            if (rl) rl.close()
          }
       }
 
@@ -99,6 +114,7 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
          let code = await XeonBotInc.requestPairingCode(phoneNumber)
          code = code?.match(/.{1,4}/g)?.join("-") || code
          console.log(chalk.black(chalk.bgGreen(`Your Pairing Code : `)), chalk.black(chalk.white(code)))
+         if (XeonBotInc.dashboard) XeonBotInc.dashboard.setPairingCode(code)
       }, 3000)
    }
 
@@ -112,6 +128,15 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
             if (!XeonBotInc.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
             if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
             const m = smsg(XeonBotInc, mek, store)
+            // Forward to dashboard live feed (non-blocking)
+            if (XeonBotInc.dashboard && m && !m.key?.fromMe) {
+                try { XeonBotInc.dashboard.message({
+                    from: m.key?.remoteJid,
+                    pushname: m.pushName,
+                    text: m.text || m.body || '',
+                    isGroup: !!m.isGroup
+                }) } catch (_) {}
+            }
             require("./XeonBug5")(XeonBotInc, m, chatUpdate, store)
         } catch (err) {
             console.log(err)
@@ -168,6 +193,26 @@ const {  state, saveCreds } =await useMultiFileAuthState(`./session`)
 
     XeonBotInc.serializeM = (m) => smsg(XeonBotInc, m, store)
 
+    // Start web dashboard (uses same Baileys connection)
+    startDashboard(XeonBotInc)
+    if (XeonBotInc.dashboard) {
+        XeonBotInc.dashboard.log('🚀 Alpha by Mason starting…')
+    }
+
+    // QR code generation — for both terminal and dashboard
+    if (!XeonBotInc.authState.creds.registered) {
+        XeonBotInc.ev.on('connection.update', async (s) => {
+            if (s.qr) {
+                try {
+                    const dataUrl = await QRCode.toDataURL(s.qr, { width: 320, margin: 2 })
+                    if (XeonBotInc.dashboard) XeonBotInc.dashboard.setQR(dataUrl, s.qr)
+                    console.log('\n📱 Scan this QR in WhatsApp → Linked Devices:\n')
+                    require('qrcode-terminal').generate(s.qr, { small: true })
+                } catch (e) { console.log('QR error:', e.message) }
+            }
+        })
+    }
+
 XeonBotInc.ev.on("connection.update",async  (s) => {
         const { connection, lastDisconnect } = s
         if (connection == "open") {
@@ -180,6 +225,12 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
             console.log(chalk.magenta(`${themeemoji} GITHUB: mason`))
             console.log(chalk.magenta(`${themeemoji} WA OWNER: ${ownername}`))
             console.log(chalk.magenta(`${themeemoji} CREDIT: Mason (Alpha Bot)`))
+            if (XeonBotInc.dashboard) {
+                XeonBotInc.dashboard.setConnected(true)
+                XeonBotInc.dashboard.setUser(XeonBotInc.user)
+                XeonBotInc.dashboard.setQR(null, null)
+                XeonBotInc.dashboard.log('✅ Connected to WhatsApp')
+            }
         }
         if (
             connection === "close" &&
@@ -187,6 +238,10 @@ XeonBotInc.ev.on("connection.update",async  (s) => {
             lastDisconnect.error &&
             lastDisconnect.error.output.statusCode != 401
         ) {
+            if (XeonBotInc.dashboard) {
+                XeonBotInc.dashboard.setConnected(false)
+                XeonBotInc.dashboard.log('⚠️ Connection lost, reconnecting…')
+            }
             startXeonBotInc()
         }
     })
