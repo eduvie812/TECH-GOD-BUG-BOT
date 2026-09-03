@@ -2630,18 +2630,110 @@ break
                     replygcxeon(`😂 *Fun*\n\n${pickRandom(lines)}\n\n— ${botname}`)
                 }
                 break
+            case 'joke':
+                {
+                    let jokes = [
+                        'Why did the developer go broke? Because he used up all his cache! 💸',
+                        'Why do programmers prefer dark mode? Because light attracts bugs 🐛',
+                        'I told my computer I needed a break — it said "no problem, I will keep crashing." 💥',
+                        'Why was the JavaScript developer sad? Because he didn\'t Node how to Express himself 😢',
+                        'There are 10 types of people in the world: those who understand binary and those who don\'t 😎',
+                    ]
+                    replygcxeon(`😂 *Joke*\n\n${pickRandom(jokes)}\n\n— ${botname}`)
+                }
+                break
+            case 'quote':
+                {
+                    let quotes = [
+                        'Code is like humor. When you have to explain it, it\'s bad. — Cory House',
+                        'First, solve the problem. Then, write the code. — John Johnson',
+                        'Experience is the name everyone gives to their mistakes. — Oscar Wilde',
+                        'In order to be irreplaceable, one must always be different. — Coco Chanel',
+                        'Simplicity is the soul of efficiency. — Austin Freeman',
+                    ]
+                    replygcxeon(`💬 *Quote*\n\n"${pickRandom(quotes)}"\n\n— ${botname}`)
+                }
+                break
+            case 'fact':
+                {
+                    let facts = [
+                        'Honey never spoils. Archaeologists have found 3000-year-old honey in Egyptian tombs that\'s still edible! 🍯',
+                        'A group of flamingos is called a "flamboyance." 🦩',
+                        'Bananas are berries, but strawberries aren\'t. 🍌',
+                        'Octopuses have three hearts. 🐙',
+                        'The Eiffel Tower can grow up to 15 cm taller in summer due to thermal expansion. 🗼',
+                    ]
+                    replygcxeon(`🧠 *Fact*\n\n${pickRandom(facts)}\n\n— ${botname}`)
+                }
+                break
+            case 'compliment':
+                {
+                    let target = m.mentionedJid[0] ? '@' + m.mentionedJid[0].split('@')[0] : (text || 'you')
+                    let comps = [
+                        `${target}, you light up every room you walk into! ✨`,
+                        `${target}, your smile is contagious 😊`,
+                        `${target}, you are an awesome human being 💖`,
+                        `${target}, the world is better with you in it 🌍`,
+                        `${target}, you are stronger than you think 💪`,
+                    ]
+                    replygcxeon(`💝 *Compliment*\n\n${pickRandom(comps)}`)
+                }
+                break
+            case 'insult':
+                {
+                    let target = m.mentionedJid[0] ? '@' + m.mentionedJid[0].split('@')[0] : (text || 'you')
+                    let ins = [
+                        `${target}, you have something on your chin... no, the third one down. 🤡`,
+                        `${target}, your WiFi is as weak as your decisions 📶`,
+                        `${target}, if laziness was an Olympic sport, you would still come second — too lazy to compete. 🏅`,
+                        `${target}, you bring everyone so much joy... when you leave the chat. 🚪`,
+                    ]
+                    replygcxeon(`😈 *Insult*\n\n${pickRandom(ins)}`)
+                }
+                break
+            case 'whatif':
+                {
+                    let s = pickRandom([
+                        'What if the sky was green? 🌿',
+                        'What if cats could talk? 🐱',
+                        'What if money grew on trees? 💸🌳',
+                        'What if gravity flipped for 1 second? 🙃',
+                        'What if we all woke up as bots? 🤖',
+                    ])
+                    replygcxeon(`🤔 *What If*\n\n${s}\n\n— ${botname}`)
+                }
+                break
+            case 'define':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} <word>`)
+                    let def = pickRandom([
+                        `*${text}* — A fancy way of saying "I don't know, but it sounds smart." 🧠`,
+                        `*${text}* — According to Mason: "It's definitely a thing." ✔️`,
+                        `*${text}* — Something only true legends understand. 😎`,
+                        `*${text}* — See: ${pickRandom(['chocolate','pizza','sleep','WiFi','coffee'])}. 🍕`,
+                    ])
+                    replygcxeon(`📖 *Alpha Dictionary*\n\n${def}`)
+                }
+                break
+            case 'weather':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} <city>`)
+                    let t = Math.floor(Math.random() * 35) - 5
+                    let conds = ['Sunny ☀️','Cloudy ☁️','Rainy 🌧️','Snowy ❄️','Windy 💨','Stormy ⛈️']
+                    replygcxeon(`🌦️ *Weather in ${text}*\n\nCondition: ${pickRandom(conds)}\nTemp: ${t}°C\n\n— ${botname}`)
+                }
+                break
             case 'menu':
             case 'help':
             case 'alive':
             case 'allmenu':
                 let xeonmenuoh = `╭══ *❍ ᴬᴸᴾᴴᴬ-ᴮᵞ ᴹᴬˢᴼᴺ ❍*
-┃❁ *ᴏᴡɴᴇʀ:* ᴛᴇᴄʜ ○■□● ɢᴏᴅ
+┃❁ *ᴏᴡɴᴇʀ:* 👑 ᴹᴬˢᴼᴺ
 ┃❁ *ᴜᴘᴛɪᴍᴇ:* ${runtime(process.uptime())}
 ┃❁ *User:* ${pushname}
 ╰┈➤ ${xeonytimewisher} 😄  My bro
-⚠️⚠️ ~Don't forget to subscribe~ 
-*Tech god* ~Youtube Channel~ ⚠️⚠️
-_Any help: yt link http://www.youtube.com/@techgod143_
+⚡⚡ ~ᴬᴸᴾᴴᴬ ᴮᵞ ᴹᴬˢᴼᴺ~ ⚡⚡
+_Any help: contact Mason_
 ╰═════════════════⊷
 ╭═══❂ 𝗕𝗨𝗚 𝗠𝗘𝗡𝗨 ❂
 ┃ ❏ *xʀᴇᴀᴄᴛ <ʀᴇᴘʟʏ ᴄʜᴀᴛ>*
@@ -2684,6 +2776,33 @@ _Any help: yt link http://www.youtube.com/@techgod143_
 ┃ ❏ *ᴘᴍʙᴜɢ*
 ┃ ❏ *ᴛʀᴏʟʟʏʙᴜɢ*
 ╰══════════════════⊷
+╭═══❂ 𝗚𝗔𝗠𝗘𝗦 𝗠𝗘𝗡𝗨 ❂
+┃ ❏ *ᴅɪᴄᴇ <sides>*
+┃ ❏ *ᴄᴏɪɴ / ғʟɪᴘ*
+┃ ❏ *ʀᴘs <rock|paper|scissors>*
+┃ ❏ *sʟᴏᴛ / sʟᴏᴛs*
+┃ ❏ *8ʙᴀʟʟ <ǫᴜᴇsᴛɪᴏɴ>*
+┃ ❏ *ᴛɪᴄᴛᴀᴄᴛᴏᴇ / ᴛᴛᴛ*
+┃ ❏ *ᴛʀɪᴠɪᴀ*
+┃ ❏ *ᴍᴀᴛʜ / ǫᴜɪᴢ*
+┃ ❏ *ᴛʀᴜᴛʜ*
+┃ ❏ *ᴅᴀʀᴇ*
+┃ ❏ *ʀᴀᴛᴇ <ᴛʜɪɴɢ>*
+┃ ❏ *ᴘɪᴄᴋ a|b|c*
+┃ ❏ *sʜɪᴘ @user*
+┃ ❏ *ʜᴀɴɢᴍᴀɴ*
+┃ ❏ *ғᴜɴ*
+╰══════════════════⊷
+╭═══❂ 𝗙𝗨𝗡 𝗠𝗘𝗡𝗨 ❂
+┃ ❏ *ᴊᴏᴋᴇ*
+┃ ❏ *ǫᴜᴏᴛᴇ*
+┃ ❏ *ғᴀᴄᴛ*
+┃ ❏ *ᴄᴏᴍᴘʟɪᴍᴇɴᴛ @user*
+┃ ❏ *ɪɴsᴜʟᴛ @user*
+┃ ❏ *ᴡʜᴀᴛɪғ*
+┃ ❏ *ᴅᴇғɪɴᴇ <ᴡᴏʀᴅ>*
+┃ ❏ *ᴡᴇᴀᴛʜᴇʀ <ᴄɪᴛʏ>*
+╰══════════════════⊷
 ╭═══❂ 𝗢𝗪𝗡𝗘𝗥 𝗠𝗘𝗡𝗨 ❂
 ┃ ❏ *ɢᴇᴛsᴇssɪᴏɴ*
 ┃ ❏ *ᴅᴇʟᴇᴛᴇsᴇssɪᴏɴ*
@@ -2724,9 +2843,10 @@ _Any help: yt link http://www.youtube.com/@techgod143_
 ╰══════════════════⊷
 ╭═══❂ 𝗠𝗔𝗜𝗡 𝗠𝗘𝗡𝗨 ❂
 ┃ ❏ *ᴍᴇɴᴜ*
+┃ ❏ *ᴀʟʟᴍᴇɴᴜ*
 ┃ ❏ *ʜᴇʟᴘ*
 ┃ ❏ *ʟɪsᴛ*
-┃ ❏ *ʙᴜʏᴘʀᴇᴍɪᴜᴍ +917466008456*
+┃ ❏ *ʙᴜʏᴘʀᴇᴍɪᴜᴍ*
 ┃ ❏ *ʀᴜɴᴛɪᴍᴇ*
 ┃ ❏ *sᴄʀɪᴘᴛ*
 ┃ ❏ *ᴅᴏɴᴀᴛᴇ*
@@ -2734,6 +2854,7 @@ _Any help: yt link http://www.youtube.com/@techgod143_
 ┃ ❏ *ᴄʟᴇᴀʀᴄʜᴀᴛ*
 ┃ ❏ *sᴡᴍ*
 ┃ ❏ *ʙᴄɢᴄ*
+┃ ❏ *ᴘɪɴɢ*
 ╰══════════════════⊷
 ╭═══❂ 𝗖𝗢𝗡𝗩𝗘𝗥𝗧 𝗠𝗘𝗡𝗨 ❂
 ┃ ❏ *sᴛɪᴄᴋᴇʀ*
