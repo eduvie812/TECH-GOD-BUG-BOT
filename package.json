@@ -1,12 +1,11 @@
 {
-    "name": "XBug-Bot",
-    "version": "5.0.0",
-    "description": "WhatsApp War Bot Using Nodejs",
+    "name": "alpha-by-mason",
+    "version": "1.0.0",
+    "description": "Alpha Bot By Mason - Powerfull WhatsApp Multi Device Bot with Bug + Games + Tools",
     "main": "main.js",
     "type": "commonjs",
     "directories": {
         "lib": "lib",
-        "database": "database",
         "database": "database",
         "session": "session",
         "media": "media"
@@ -14,7 +13,7 @@
     "scripts": {
         "start": "node index.js"
     },
-    "author": "DGXeon",
+    "author": "Mason",
     "license": "MIT",
     "dependencies": {
         "@whiskeysockets/baileys": "^6.5.0",

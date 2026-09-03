@@ -1,11 +1,5 @@
 //base by Tech-God
-//re-upload? recode? copy code? give credit ya :)
-//YouTube: @techgod143
-//Instagram: techgod143
-//Telegram: t.me/techgod143
-//GitHub: @techgod143
-//WhatsApp: +917466008456
-//want more free bot scripts? subscribe to my youtube channel: https://youtube.com/@techgod143
+//re-coded & customized by Mason (Alpha Bot)
 
 const {
    spawn
@@ -20,7 +14,7 @@ function start() {
       })
       .on('message', data => {
          if (data == 'reset') {
-            console.log('Restarting Bot...')
+            console.log('Restarting Alpha Bot...')
             p.kill()
             start()
             delete p

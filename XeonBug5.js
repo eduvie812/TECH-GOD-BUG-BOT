@@ -2468,10 +2468,173 @@ await sleep(3000)
 replygcxeon(`*Successfully sent Bug To ${xeongc} Please pause for 3 minutes*`)
 } 
 break
+            case 'dice':
+            case 'roll':
+                {
+                    let sides = parseInt(args[0]) || 6
+                    if (sides < 2 || sides > 1000) return replygcxeon('⚠️ Dice sides must be between 2 and 1000')
+                    let result = Math.floor(Math.random() * sides) + 1
+                    replygcxeon(`🎲 *Dice Roll (d${sides})*\n\nYou rolled: *${result}*\n\nGood luck next time, ${pushname}!`)
+                }
+                break
+            case 'coin':
+            case 'flip':
+            case 'coinflip':
+                {
+                    let result = Math.random() < 0.5 ? 'Heads 🪙' : 'Tails 🪙'
+                    replygcxeon(`🪙 *Coin Flip*\n\nResult: *${result}*\n\nFlipped by ${pushname}!`)
+                }
+                break
+            case 'rps':
+            case 'rockpaperscissors':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} rock|paper|scissors`)
+                    let choices = ['rock', 'paper', 'scissors']
+                    let pick = text.toLowerCase().split(/ +/)[0]
+                    if (!choices.includes(pick)) return replygcxeon('⚠️ Choose: rock, paper or scissors')
+                    let bot = choices[Math.floor(Math.random() * 3)]
+                    let win = (pick == 'rock' && bot == 'scissors') || (pick == 'paper' && bot == 'rock') || (pick == 'scissors' && bot == 'paper')
+                    let draw = pick === bot
+                    let res = draw ? '🤝 Draw!' : win ? '🎉 You win!' : '😢 You lose!'
+                    replygcxeon(`🪨📄✂️ *Rock Paper Scissors*\n\nYou: *${pick}*\nAlpha: *${bot}*\n\n${res}`)
+                }
+                break
+            case '8ball':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} <question>`)
+                    let answers = ['Yes ✅', 'No ❌', 'Maybe 🤔', 'Definitely! 💯', 'Not sure 😐', 'Try again later 🔁', 'I think so 👍', 'Absolutely not 🚫', 'It is certain 🔮', 'Ask Mason later 😂']
+                    replygcxeon(`🎱 *Magic 8-Ball*\n\nQuestion: ${text}\n\nAnswer: *${pickRandom(answers)}*`)
+                }
+                break
+            case 'slot':
+            case 'slots':
+                {
+                    let symbols = ['🍒','🍋','🍉','🍇','⭐','💎','7️⃣']
+                    let a = pickRandom(symbols), b = pickRandom(symbols), c = pickRandom(symbols)
+                    let win = (a === b && b === c)
+                    let semi = (a === b || b === c || a === c)
+                    let msg = `🎰 *Slot Machine*\n\n[ ${a} | ${b} | ${c} ]\n\n${win ? '🎉 JACKPOT! Big win!' : semi ? '✨ Nice! Small win!' : '😢 Better luck next time!'}\n\nPlayer: ${pushname}`
+                    replygcxeon(msg)
+                }
+                break
+            case 'tictactoe':
+            case 'ttt':
+                {
+                    let emojis = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣']
+                    let board = `\`\`\`
+ ${emojis[0]} | ${emojis[1]} | ${emojis[2]}
+---+---+---
+ ${emojis[3]} | ${emojis[4]} | ${emojis[5]}
+---+---+---
+ ${emojis[6]} | ${emojis[7]} | ${emojis[8]}
+\`\`\``
+                    replygcxeon(`🎮 *TicTacToe by Alpha*\n\nReply with the number (1-9) of the cell you want to play.\n\n${board}\n\nPlayer: ${pushname}`)
+                }
+                break
+            case 'trivia':
+                {
+                    let questions = [
+                        {q: 'What is the capital of France?', a: 'Paris'},
+                        {q: 'Which planet is known as the Red Planet?', a: 'Mars'},
+                        {q: 'How many continents are on Earth?', a: '7'},
+                        {q: 'What is the largest ocean?', a: 'Pacific'},
+                        {q: 'Who painted the Mona Lisa?', a: 'Da Vinci'},
+                        {q: 'What is 9 x 7?', a: '63'},
+                        {q: 'Which language is spoken in Brazil?', a: 'Portuguese'},
+                        {q: 'How many legs does an octopus have?', a: '8'},
+                    ]
+                    let q1 = pickRandom(questions)
+                    replygcxeon(`🧠 *Trivia*\n\nQ: *${q1.q}*\n\nReply with your answer in one message. No cheating! 😎`)
+                }
+                break
+            case 'math':
+            case 'quiz':
+                {
+                    let a = Math.floor(Math.random() * 50) + 1
+                    let b = Math.floor(Math.random() * 50) + 1
+                    let ops = ['+','-','*']
+                    let op = pickRandom(ops)
+                    let ans
+                    if (op === '+') ans = a + b
+                    if (op === '-') ans = a - b
+                    if (op === '*') ans = a * b
+                    replygcxeon(`🧮 *Math Quiz*\n\n${a} ${op} ${b} = ?\n\nReply with the answer in one message.\n\nPlayer: ${pushname}`)
+                }
+                break
+            case 'truth':
+                {
+                    let t = pickRandom([
+                        'What is your biggest fear?',
+                        'Have you ever lied to your best friend?',
+                        'What is the most embarrassing thing you have done?',
+                        'Have you ever cheated on a test?',
+                        'What is a secret you have never told anyone?',
+                        'Who is your secret crush?',
+                        'What is the last lie you told?',
+                    ])
+                    replygcxeon(`🟢 *Truth*\n\n${t}\n\n— ${pushname}`)
+                }
+                break
+            case 'dare':
+                {
+                    let d = pickRandom([
+                        'Send a voice note singing your favorite song 🎤',
+                        'Send the weirdest emoji you know 🤪',
+                        'Text your crush "hi" right now 😏',
+                        'Change your profile picture to a cat for 1 hour 🐱',
+                        'Send a selfie with a funny face 🤡',
+                        'Type your last 5 google searches 🔎',
+                    ])
+                    replygcxeon(`🔴 *Dare*\n\n${d}\n\n— ${pushname}`)
+                }
+                break
+            case 'rate':
+                {
+                    if (!text) return replygcxeon(`Use: ${prefix+command} <something>`)
+                    let score = Math.floor(Math.random() * 101)
+                    replygcxeon(`⭐ *Alpha Rating*\n\n"${text}"\n\nRating: *${score}/100*`)
+                }
+                break
+            case 'pick':
+            case 'choose':
+                {
+                    if (!text.includes('|')) return replygcxeon(`Use: ${prefix+command} option1 | option2 | option3`)
+                    let opts = text.split('|').map(v => v.trim()).filter(Boolean)
+                    if (opts.length < 2) return replygcxeon('⚠️ Provide at least 2 options separated by |')
+                    replygcxeon(`🎯 *Alpha Chooser*\n\nOptions: ${opts.join(', ')}\n\nWinner: *${pickRandom(opts)}*`)
+                }
+                break
+            case 'ship':
+                {
+                    let tag = text || (m.mentionedJid && m.mentionedJid.length >= 2 ? '@' + m.mentionedJid[0].split('@')[0] + ' ❤ @' + m.mentionedJid[1].split('@')[0] : 'You ❤ Someone')
+                    replygcxeon(`💘 *Alpha Ship*\n\n${tag}\n\nLove percent: *${Math.floor(Math.random()*101)}%*\n\nMade by Mason 💖`)
+                }
+                break
+            case 'hangman':
+                {
+                    let words = ['alpha','mason','whatsapp','bot','program','discord','python','keyboard','android','computer','internet']
+                    let w = pickRandom(words)
+                    let hidden = w.split('').map(c => '➖').join('')
+                    replygcxeon(`🪢 *Hangman*\n\nWord: \`${hidden}\`  (${w.length} letters)\n\nGuess the word by replying with single letters.\n\nPlayer: ${pushname}`)
+                }
+                break
+            case 'fun':
+                {
+                    let lines = [
+                        'My owner Mason is cooler than yours 😎',
+                        'Alpha by Mason: When bots want to be smart 🤖',
+                        'I came, I saw, I crashed WhatsApp 😂',
+                        '404: bugs not found, just kidding 🐛',
+                        'I speak JavaScript, not problems 👀',
+                    ]
+                    replygcxeon(`😂 *Fun*\n\n${pickRandom(lines)}\n\n— ${botname}`)
+                }
+                break
             case 'menu':
             case 'help':
             case 'alive':
-                let xeonmenuoh = `╭══ *❍ 𝗧𝗘𝗖𝗛_𝗚𝗢𝗗-BUG_BOT ❍*
+            case 'allmenu':
+                let xeonmenuoh = `╭══ *❍ ᴬᴸᴾᴴᴬ-ᴮᵞ ᴹᴬˢᴼᴺ ❍*
 ┃❁ *ᴏᴡɴᴇʀ:* ᴛᴇᴄʜ ○■□● ɢᴏᴅ
 ┃❁ *ᴜᴘᴛɪᴍᴇ:* ${runtime(process.uptime())}
 ┃❁ *User:* ${pushname}
